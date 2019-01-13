@@ -46,11 +46,9 @@ class main extends PluginBase implements Listener
     {
         if (FormApi::FormCancelled($response)) {
             // formがキャンセルされていれば
-            //$this->getLogger()->info("form was cancelled.");
             unset($this->form_data[$player->getName()]);
         } else {
             // formがキャンセルされていなければ
-            //var_dump($response);
             switch ($response) {
                 case 0:
                     $player->sendMessage("§l§eワールド管理システム>>自分のワールドに戻っています...");
@@ -62,11 +60,38 @@ class main extends PluginBase implements Listener
                     $this->goLevel($player, $this->getServer()->getLevelByName("world"), $player->getName());
                     $this->getLogger()->info($player->getName()."はロビーに移動しています");
                     break;
+                case 2:
+                    $fileList = array();
+                    foreach ($this->getServer()->getOnlinePlayers() as $player1) {
+                        array_push($fileList, $player1->getName());
+                    }
+                    $name = $fileList[array_rand($fileList)];
+                    $sender->sendMessage("§l§eワールド管理システム>>" . $name . "のワールドへ移動します。");
+                    if ($this->exsistlevel($name)) {
+                        $this->goLevel($sender, $this->getServer()->getLevelByName($name), $sender->getName());
+                    } else {
+                        $sender->sendMessage("§l§cワールド管理システム>>エラー");
+                    }
+                    break;
+                case 3:
+                    $dir = "/home/tomo/Public/pmmp/worlds/";
+                    $files = glob($dir . '{*}', GLOB_BRACE);
+                    $array = array();
+                    foreach ($files as $file) {
+                        $name = str_replace($dir, "", $file);
+                        $array[] = $name;
+                    }
+                    $name = str_replace($dir,"", $array[array_rand($array)]);
+                    $sender->sendMessage("§l§eワールド管理システム>>" . $name . "のワールドへ移動します。");
+                    if ($this->exsistlevel($name)) {
+                        $this->goLevel($sender, $this->getServer()->getLevelByName($name), $sender->getName());
+                    } else {
+                        $sender->sendMessage("§l§cワールド管理システム>>エラー");
+                    }
+                    break;
                 default:
-                    $tap_position = $response - 2;
-                    //$this->getLogger()->info($tap_position);
+                    $tap_position = $response - 4;
                     $name = $this->form_data[$player->getName()][$tap_position];
-                    //$this->getLogger()->info($name);
                     $this->getLogger()->info($player->getName()."は".$name."さんのワールドに移動しています");
                     $player->sendMessage("§l§eワールド管理システム>>" . $name . "さんのワールドに移動しています...");
                     $this->goLevel($player, $this->getServer()->getLevelByName($name), $name);
@@ -129,9 +154,9 @@ class main extends PluginBase implements Listener
             $player->sendMessage("[§eSYSTEM§r] 生徒サーバーへようこそ");
             $player->sendMessage("[§eSYSTEM§r] このサーバーは§b建築サーバー§rです！");
             $players = Server::getInstance()->getOnlinePlayers();
-            foreach ($players as $player) {
-                if ($player->isOp()) {
-                    $player->sendMessage("[§eSYSTEM§r] 初見と思われる" . $player->getName() . "さんがサーバーに来ました");
+            foreach ($players as $player1) {
+                if ($player1->isOp()) {
+                    $player1->sendMessage("[§eSYSTEM§r] 初見と思われる" . $player->getName() . "さんがサーバーに来ました");
                 }
             }
         }
@@ -242,7 +267,9 @@ class main extends PluginBase implements Listener
                     $list = $list->setTitle("ワールドメニュー")
                         ->setContent("次はどこに行く？")
                         ->addButton((new Button("自分のワールドへ")))
-                        ->addButton((new Button("ロビーへ")));
+                        ->addButton((new Button("ロビーへ"))
+                        ->addButton((new Button("オンラインワールドランダム"))
+                        ->addButton((new Button("オールワールドランダム")));
                     $players = Server::getInstance()->getOnlinePlayers();
                     if (!isset($this->form_data[$player->getName()])) {
                         $this->form_data[$player->getName()] = [];
