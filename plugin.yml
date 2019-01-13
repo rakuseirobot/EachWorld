@@ -1,6 +1,7 @@
 name: EachWorld
 main: takesi\main
 version: 2.2
+description: ワールド管理できるプラグイン
 api: [3.0.0]
 load: POSTWORLD
 author: takesi
